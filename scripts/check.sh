@@ -14,7 +14,7 @@ L_IP[3]="$L3_IP"
 TEST_LEVEL=$1
 # int version of test level
 level=${TEST_LEVEL: -1}
-USER=root
+USER=user
 
 MACHINE=`uname -m`
 KERNEL=`uname -r`
@@ -27,7 +27,7 @@ function check_all()
 
 	for i in `seq 0 $LOCAL_TEST_LEVEL`
 	do
-		$fn L${i} root ${L_IP[$i]}
+		$fn L${i} user ${L_IP[$i]}
 	done
 }
 

@@ -1,9 +1,9 @@
 APP=${1:-"noapp"}
 ALL_EXITS=$APP-exits-all.txt
 USER=root
-L0_IP=10.10.1.2
-L1_IP=10.10.1.100
-L2_IP=10.10.1.101
+L0_IP="192.168.1.4"
+L1_IP="192.168.30.116"
+L2_IP="10.10.1.101"
 
 #These are default ones from KVM
 default_exits=(exits)

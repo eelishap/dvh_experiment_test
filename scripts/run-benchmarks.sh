@@ -1,15 +1,15 @@
 #!/bin/bash
 
-TEST_LEVEL=${1:-"L2"}
+TEST_LEVEL=${1:-"L1"}
 SINGLE_WORKLOAD=$2
 
-L0_IP="10.10.1.2"
-L1_IP="10.10.1.100"
+L0_IP="192.168.1.4"
+L1_IP="192.168.30.116"
 L2_IP="10.10.1.101"
 L3_IP="10.10.1.102"
 #PP: PV-Passthrough
 L2_PP_IP="10.10.1.201"
-TEST_USER="root"
+TEST_USER="user"
 
 mysql_option=''
 echo $SINGLE_WORKLOAD
@@ -56,7 +56,7 @@ function print_target_tests()
 
 function setup_ip_kvmpath()
 {
-	KVMPERF_PATH="/root/dvh-asplos-ae/scripts"
+	KVMPERF_PATH="~/dvh_experiment_test/scripts"
 
 	echo "TEST LEVEL: $TEST_LEVEL"
 	if [ $TEST_LEVEL == "L2" ] ; then
@@ -128,53 +128,6 @@ for TEST in ${TESTS[@]}; do
 	__i=$(($__i+1))
 done
 
-show_tests() {
-	i=0
-	echo [$i] "==== Start Test ====="
-
-	i=$(($i+1))
-	echo [$i] "All"
-
-	i=$(($i+1))
-	if [[ $LOCAL == 1 ]]; then
-		echo -n "*"
-	fi
-	echo [$i] "Hackbench"
-
-	for TEST in ${TEST_LIST[@]}; do
-		i=$(($i+1))
-		idx=$(($i-$IDX_OFFSET))
-		if [[ ${TEST_ARRAY[$idx]} == 1 ]]; then
-			echo -n "*" 
-		fi
-		echo [$i] $TEST
-	done
-
-	echo -n "Type test number(Enter 0 to start tests): "
-	read number
-
-	if [[ $number == 0 ]]; then
-		return
-	elif [[ $number == "" ]]; then
-		break;
-	elif [[ $number == 1 ]]; then
-		__i=0
-		for TEST in ${TESTS[@]}; do
-			TEST_ARRAY[$__i]=1
-			__i=$(($__i+1))
-		done
-		LOCAL=1
-	elif [[ $number == 2 ]]; then
-		LOCAL=1
-	elif [[ $number -lt 10  ]]; then
-		idx=$(($number-$IDX_OFFSET))
-		TEST_ARRAY[$idx]=1
-	else
-		echo "Wrong test number"
-	fi
-	echo ""
-}
-
 pick_test() {
 	if [[ $SINGLE_WORKLOAD == 'hackbench' ]]; then
 		LOCAL=1
@@ -198,8 +151,50 @@ if [[ $SINGLE_WORKLOAD ]]; then
 else
 	while :
 	do
-		# This is an inline function, and it has 'break' in it.
-		show_tests
+		i=0
+		echo [$i] "==== Start Test ====="
+
+		i=$(($i+1))
+
+		echo [$i] "All"
+		i=$(($i+1))
+		if [[ $LOCAL == 1 ]]; then
+			echo -n "*"
+		fi
+		echo [$i] "Hackbench"
+		for TEST in ${TEST_LIST[@]}; do
+			i=$(($i+1))
+			idx=$(($i-$IDX_OFFSET))
+			if [[ ${TEST_ARRAY[$idx]} == 1 ]]; then
+				echo -n "*"
+			fi
+			echo [$i] $TEST
+		done
+
+		echo -n "Type test number(Enter 0 to start tests): "
+		read number
+
+		if [[ $number == 0 ]]; then
+			break;
+		elif [[ $number == "" ]]; then
+			break;
+		elif [[ $number == 1 ]]; then
+			__i=0
+			for TEST in ${TESTS[@]}; do
+				TEST_ARRAY[$__i]=1
+				__i=$(($__i+1))
+			done
+			LOCAL=1
+		elif [[ $number == 2 ]]; then
+			LOCAL=1
+		elif [[ $number -lt 10  ]]; then
+			idx=$(($number-$IDX_OFFSET))
+			TEST_ARRAY[$idx]=1
+			echo $number
+		else
+			echo "Wrong test number"
+		fi
+		echo ""
 	done
 	echo -n "Enter test name: "
 	read TEST_DESC
@@ -218,12 +213,17 @@ TESTS=( $TESTS )
 SERVICES=( $SERVICES )
 CMD_PATH=$KVMPERF_PATH
 LOCAL_PATH=$KVMPERF_PATH
+# echo $TESTS;
+# echo $SERVICES;
+# echo $CMD_PATH;
+# echo $LOCAL_PATH;
+# echo $TEST_DESC;
 
 if [[ -n $TEST_DESC ]]; then
 	mkdir $TEST_DESC
 	echo -n "How many times to repeat? "
 	read repeat
-	install_tests
+	# install_tests
 
 	for i in `seq 1 $repeat`; do
 		run_tests
@@ -232,6 +232,6 @@ if [[ -n $TEST_DESC ]]; then
 	done
 	echo "$TEST_DESC is done"
 else
-	install_tests
+	# install_tests
 	run_tests
 fi
